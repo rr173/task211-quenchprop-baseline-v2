@@ -112,7 +112,9 @@ func Propagate(onsets map[string]float64, channels []*model.Channel, topo *model
 	}
 	sort.Strings(res.AffectedSegments)
 
-	// 从起点分段 BFS，沿拓扑计算相邻分段到达时间差 -> 速度
+	// 从起点分段 BFS，沿拓扑（边为无向）计算相邻分段到达时间差 -> 速度。
+	// 邻接边是无向关系，必须用 Neighbors 双向展开，否则反方向录入的边
+	// 会导致反向传播缺失（从远端分段出发无法回溯到起点侧分段）。
 	onsetSeg := chanSeg[onsetCh]
 	speeds := []SegmentSpeed{}
 	visited := map[string]bool{onsetSeg: true}
@@ -124,10 +126,7 @@ func Propagate(onsets map[string]float64, channels []*model.Channel, topo *model
 		if curArr < 0 {
 			continue
 		}
-		for _, e := range topo.Edges {
-			if e.FromID != cur {
-				continue
-			}
+		for _, e := range topo.Neighbors(cur) {
 			toArr := arrivalForSegment(e.ToID, chanSeg, onsets)
 			if toArr < 0 {
 				continue
