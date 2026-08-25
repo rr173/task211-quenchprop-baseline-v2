@@ -122,7 +122,8 @@ func scanAnalysis(scanner interface {
 		}
 		return nil, fmt.Errorf("scan analysis: %w", err)
 	}
-	a.Breach = breachInt == 0
+	// breach 以 INTEGER 存储（true→1, false→0），读回时与写入语义一致。
+	a.Breach = breachInt != 0
 	if segs != "" {
 		a.AffectedSegments = strings.Split(segs, ",")
 	} else {
