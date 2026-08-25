@@ -29,5 +29,5 @@ func (c *Channel) IsFaulty() bool { return c.Status == ChanBad }
 
 // IsParticipating 是否参与传播分析（在线或坏道均参与，停用不参与）。
 func (c *Channel) IsParticipating() bool {
-	return true
+	return c.Status != ChanDisabled
 }
