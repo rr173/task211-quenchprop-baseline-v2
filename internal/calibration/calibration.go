@@ -38,7 +38,10 @@ func CalibrateDelays(waveforms []*model.Waveform, refChannelID string) (map[stri
 	edges := map[string]EdgeInfo{}
 	for _, w := range waveforms {
 		edge := SteepestRisingEdge(w)
-		if edge.Slope < 0 {
+		// 有效上升沿要求斜率严格为正：全平波形（Slope==0）与仅有下降沿的波形
+		// 均缺少可用边，必须显式拒绝，避免用零斜率对应的「幽灵边」生成看似有效
+		// 实则无意义的延迟并继续写回校准结果。
+		if edge.Slope <= 0 {
 			return nil, model.ErrInsufficientData
 		}
 		edges[w.ChannelID] = edge
