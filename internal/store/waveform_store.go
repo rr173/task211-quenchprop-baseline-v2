@@ -157,11 +157,17 @@ func (s *WaveformStore) ListFullByExperiment(expID string) ([]*model.Waveform, e
 	return out, nil
 }
 
-// UpdateCalibration 回写校准结果（延迟与校准标记）。
-func (s *WaveformStore) UpdateCalibration(id string, delayNs float64, calibrated bool) error {
-	if _, err := s.db.Exec(`UPDATE waveforms SET delay_ns=?,calibrated=? WHERE id=?`,
-		delayNs, boolToInt(calibrated), id); err != nil {
+// UpdateCalibration 回写校准结果（延迟与校准标记），并推进版本号以支持
+// 后续并发更新检测（乐观锁）。version 为读时获取的版本号，校验失败返回 ErrConflict。
+func (s *WaveformStore) UpdateCalibration(id string, delayNs float64, calibrated bool, version int64) error {
+	res, err := s.db.Exec(`UPDATE waveforms SET delay_ns=?,calibrated=?,version=? WHERE id=? AND version=?`,
+		delayNs, boolToInt(calibrated), version+1, id, version)
+	if err != nil {
 		return fmt.Errorf("update calibration: %w", err)
+	}
+	n, _ := res.RowsAffected()
+	if n == 0 {
+		return model.ErrConflict
 	}
 	return nil
 }

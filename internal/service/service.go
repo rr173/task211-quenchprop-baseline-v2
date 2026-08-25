@@ -146,9 +146,10 @@ func (a *App) Calibrate(expID, refChannelID string) (map[string]float64, error) 
 		return nil, err
 	}
 	for _, w := range wfs {
-		if err := a.wf.UpdateCalibration(w.ID, w.DelayNs, w.Calibrated); err != nil {
+		if err := a.wf.UpdateCalibration(w.ID, w.DelayNs, w.Calibrated, w.Version); err != nil {
 			return nil, err
 		}
+		w.Version++
 	}
 	return delays, nil
 }
