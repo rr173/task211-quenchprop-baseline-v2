@@ -39,7 +39,7 @@ func FingerprintOf(expID, chanID string, rate float64, points []Sample) string {
 		first = points[0].V
 		last = points[len(points)-1].V
 	}
-	raw := fmt.Sprintf("%s|%.6f|%d|%.9f|%.9f", expID, rate, len(points), first, last)
+	raw := fmt.Sprintf("%s|%s|%.6f|%d|%.9f|%.9f", expID, chanID, rate, len(points), first, last)
 	sum := sha256.Sum256([]byte(raw))
 	return hex.EncodeToString(sum[:])
 }
