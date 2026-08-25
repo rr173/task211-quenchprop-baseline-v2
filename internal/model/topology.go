@@ -38,7 +38,7 @@ func (t *CoilTopology) Validate() error {
 		segments[s.ID] = struct{}{}
 	}
 	for _, e := range t.Edges {
-		if e.ID == "" || e.FromID == "" || e.ToID == "" || math.IsNaN(e.Distance) || math.IsInf(e.Distance, 0) {
+		if e.ID == "" || e.FromID == "" || e.ToID == "" || e.Distance < 0 || math.IsNaN(e.Distance) || math.IsInf(e.Distance, 0) {
 			return ErrInvalidArgument
 		}
 		if _, ok := segments[e.FromID]; !ok {
