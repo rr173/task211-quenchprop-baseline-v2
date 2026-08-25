@@ -352,8 +352,12 @@ func (a *App) PublishAnalysis(anaID string) (*model.AnalysisPackage, error) {
 	return a.ana.Get(ana.ID)
 }
 
-// UpdateExperimentTopology 更新试验的拓扑引用。
+// UpdateExperimentTopology 更新试验的拓扑引用。封存后拒写，与新增通道、
+// 摄入波形等写入路径一致。
 func (a *App) UpdateExperimentTopology(e *model.DischargeExperiment) error {
+	if !e.IsWritable() {
+		return model.ErrSealed
+	}
 	return a.exp.Update(e)
 }
 
